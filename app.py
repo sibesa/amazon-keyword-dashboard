@@ -21,20 +21,21 @@ st.title("🔍 Amazon ASIN Yönetim Paneli")
 # ---------------------- Sol Menü ----------------------
 with st.sidebar:
     st.header("Ürün Tanımı")
-    menu_option = st.radio("Seçim yapın", ("Ana Sayfa", "ASIN Ekle"))
+    menu_option = st.radio("Seçim yapın", ("Ana Sayfa", "ASIN Ekle", "Raporlar"))
 
-# ---------------------- ASIN Eklemeyi Seçme ----------------------
+# ---------------------- ASIN Ekleme Formu ----------------------
 if menu_option == "ASIN Ekle":
     st.header("ASIN Ekleme Formu")
     
-    # ASIN girişi ve açıklama eklemek için input alanları
-    asin_input = st.text_input("ASIN (10 karakter)", max_chars=10)
+    # ASIN girişi için güzel bir tasarım
+    asin_input = st.text_input("ASIN (10 karakterli bir ASIN girin)", value="", max_chars=10)
     
+    # Eğer ASIN girildiyse ve 10 karakterse
     if len(asin_input) == 10:
-        description_input = st.text_area("Açıklama (Ürün hakkında açıklama ekleyin)")
+        description_input = st.text_area("Açıklama (Ürün hakkında açıklama ekleyin)", height=150)
         
-        # Ekle butonu (mavi renk)
-        if st.button("Ekle", key="add_button", help="Veriyi eklemek için tıklayın", use_container_width=True):
+        # ASIN ve açıklama kaydetmek için buton
+        if st.button("Kaydet", key="add_button", help="Veriyi kaydetmek için tıklayın", use_container_width=True):
             if description_input:
                 # Veritabanına kaydetme
                 df_existing = load_data()
@@ -48,6 +49,21 @@ if menu_option == "ASIN Ekle":
     elif asin_input:
         st.error("❌ ASIN 10 karakter olmalıdır. Lütfen geçerli bir ASIN girin.")
     
+# ---------------------- Raporlar ----------------------
+elif menu_option == "Raporlar":
+    st.header("Eklenmiş ASIN'ler")
+    
+    # Daha önce eklenmiş ASIN'leri gösterme
+    df_existing = load_data()
+    
+    if len(df_existing) > 0:
+        for index, row in df_existing.iterrows():
+            st.subheader(f"ASIN: {row['ASIN']}")
+            st.write(f"Açıklama: {row['Description']}")
+            st.write("---")
+    else:
+        st.write("Henüz hiçbir ASIN eklenmedi.")
+
+# ---------------------- Ana Sayfa ----------------------
 else:
     st.write("Ana sayfa içeriği burada yer alacak.")
-    
