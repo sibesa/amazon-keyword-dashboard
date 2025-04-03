@@ -71,9 +71,11 @@ min_date, max_date = df['Date'].min(), df['Date'].max()
 filter_type = st.sidebar.radio("Zaman Görünümü Seç", ["Günlük", "Haftalık", "Aylık"])
 
 if filter_type == "Günlük":
-    start_date, end_date = st.sidebar.date_input(
+  start_date, end_date = st.sidebar.date_input(
     "Tarih Aralığı",
     [min_date.to_pydatetime().date(), max_date.to_pydatetime().date()]
+)
+
 )
 
     )
