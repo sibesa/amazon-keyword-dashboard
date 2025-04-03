@@ -54,34 +54,38 @@ with st.sidebar:
     rapor_ac = st.expander("Raporlar")
 
     with tanim_ac:
-        secim = st.radio("", ["Genel Tanımlar"], key="tanımlar")
+        secim = st.radio("", ["ASIN Ekle"], key="tanımlar")
 
+    asin_list = load_data()
+    asin_secim = None
     with asin_ac:
-        secim = st.radio("", ["ASIN Ekle"], key="asinler")
+        if asin_list.empty:
+            st.info("Henüz ASIN eklenmedi.")
+        else:
+            asin_secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="asin_secim")
 
     with rapor_ac:
-        secim = st.radio("", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+        secim2 = st.radio("", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
 
 # Ana içerik alanı
-if secim == "Genel Tanımlar":
-    st.subheader("Tanımlamalar Paneli")
-    st.write("Buraya tanım işlemleri gelecek...")
-
-elif secim == "ASIN Ekle":
+if secim == "ASIN Ekle":
     st.subheader("📅 ASIN Ekle")
-    asin = st.text_input("ASIN (10 karakter)", max_chars=10)
+    asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10)
     aciklama = st.text_area("Üürün Açıklaması")
     if st.button("Kaydet"):
         if len(asin) == 10 and aciklama:
             df = load_data()
-            yeni = pd.DataFrame({"ASIN": [asin], "Açıklama": [aciklama]})
-            df = pd.concat([df, yeni], ignore_index=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success("ASIN eklendi!")
+            if asin in df["ASIN"].values:
+                st.warning("Bu ASIN zaten mevcut.")
+            else:
+                yeni = pd.DataFrame({"ASIN": [asin], "Açıklama": [aciklama]})
+                df = pd.concat([df, yeni], ignore_index=True)
+                df.to_csv(DATA_FILE, index=False)
+                st.success("ASIN başarıyla kaydedildi!")
         else:
-            st.error("ASIN 10 karakter olmalı ve açıklama boş bırakılamaz.")
+            st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
 
-elif secim == "ASIN Listesi":
+elif secim2 == "ASIN Listesi":
     st.subheader("📊 Eklenmiş ASIN'ler")
     df = load_data()
     if not df.empty:
@@ -89,7 +93,7 @@ elif secim == "ASIN Listesi":
     else:
         st.info("Henüz ASIN eklenmedi.")
 
-elif secim == "Açıklama Grafiği":
+elif secim2 == "Açıklama Grafiği":
     st.subheader("🌐 Açıklama Uzunluk Grafiği")
     df = load_data()
     if not df.empty:
