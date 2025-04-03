@@ -67,8 +67,11 @@ else:
 
 # ---------------------- Tarih Filtresi ----------------------
 st.sidebar.header("🗓️ Tarih Filtresi")
-min_date = df['Date'].dropna().min().date()
-max_date = df['Date'].dropna().max().date()
+min_date_raw = df['Date'].dropna().min()
+max_date_raw = df['Date'].dropna().max()
+min_date = min_date_raw.date() if hasattr(min_date_raw, 'date') else min_date_raw
+max_date = max_date_raw.date() if hasattr(max_date_raw, 'date') else max_date_raw
+
 filter_type = st.sidebar.radio("Zaman Görünümü Seç", ["Günlük", "Haftalık", "Aylık"])
 
 if filter_type == "Günlük":
@@ -173,3 +176,4 @@ if not fav_df.empty:
         st.sidebar.write(f"🔹 {row['ASIN']} — {row['Keyword']}")
 else:
     st.sidebar.info("Favori kelimeniz yok.")
+
