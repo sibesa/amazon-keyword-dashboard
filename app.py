@@ -65,7 +65,9 @@ with st.sidebar:
             asin_secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="asin_secim")
 
     with rapor_ac:
-        secim2 = st.radio("", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+        rapor_secim = st.radio("Rapor Seçimi", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+        if not asin_list.empty:
+            secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="rapor_asin_secim")
 
 # Ana içerik alanı
 if secim == "ASIN Ekle":
@@ -82,10 +84,11 @@ if secim == "ASIN Ekle":
                 df = pd.concat([df, yeni], ignore_index=True)
                 df.to_csv(DATA_FILE, index=False)
                 st.success("ASIN başarıyla kaydedildi!")
+                st.experimental_rerun()
         else:
             st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
 
-elif secim2 == "ASIN Listesi":
+elif rapor_secim == "ASIN Listesi":
     st.subheader("📊 Eklenmiş ASIN'ler")
     df = load_data()
     if not df.empty:
@@ -93,11 +96,11 @@ elif secim2 == "ASIN Listesi":
     else:
         st.info("Henüz ASIN eklenmedi.")
 
-elif secim2 == "Açıklama Grafiği":
+elif rapor_secim == "Açıklama Grafiği":
     st.subheader("🌐 Açıklama Uzunluk Grafiği")
     df = load_data()
     if not df.empty:
-        df['Uzunluk'] = df['Açıklama'].str.len()
+        df['Uzunluk'] = df['Açıklama'].astype(str).str.len()
         fig = px.bar(df, x="ASIN", y="Uzunluk", text="Açıklama",
                      labels={"Uzunluk": "Açıklama Uzunluğu"},
                      title="ASIN Açıklamalarının Uzunluk Dağılımı")
