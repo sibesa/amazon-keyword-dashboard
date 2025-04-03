@@ -1,85 +1,79 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+from st_aggrid import AgGrid
 import os
 
-# CSS style for custom design
+# Sayfa ayarları
+st.set_page_config(page_title="Amazon ASIN Dashboard", layout="wide")
+st.title("🔍 Amazon ASIN Dashboard")
+
+# CSS ile stil güzelleştirme
 st.markdown("""
     <style>
-    /* Sidebar */
-    .css-1d391kg {
-        background-color: #2A3D66;
-        color: white;
-    }
-    .css-ffhzg2 {
-        color: white;
-    }
-    /* Main area */
-    .css-10trblm {
-        background-color: #F5F5F5;
-        padding: 20px;
-    }
-    .stButton button {
+    .stButton>button {
         background-color: #1f77b4;
         color: white;
         font-size: 16px;
         border-radius: 5px;
         padding: 10px 20px;
+        margin-top: 10px;
     }
-    .stButton button:hover {
-        background-color: #0061C2;
+    .stButton>button:hover {
+        background-color: #125a8f;
     }
-    /* Add padding to the content */
-    .css-ffhzg2 {
-        padding-left: 20px;
-        padding-right: 20px;
+    .stTextInput>div>input {
+        font-size: 16px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Sayfa başlığı
-st.title("🔍 Amazon ASIN Yönetim Paneli")
+# Veri dosyası
+DATA_FILE = "asin_data.csv"
 
-# Sol Menü
-with st.sidebar:
-    st.header("Ürün Tanımı")
-    menu_option = st.radio("Seçim yapın", ("Ana Sayfa", "ASIN Ekle", "Raporlar"))
-
-# ---------------------- ASIN Ekleme Formu ----------------------
-if menu_option == "ASIN Ekle":
-    st.header("ASIN Ekleme Formu")
-    st.write("ASIN eklemek için gerekli formu doldurun.")
-    
-    # ASIN girişi için güzel bir tasarım
-    asin_input = st.text_input("ASIN (10 karakterli bir ASIN girin)", value="", max_chars=10)
-    
-    # Eğer ASIN girildiyse ve 10 karakterse
-    if len(asin_input) == 10:
-        description_input = st.text_area("Açıklama (Ürün hakkında açıklama ekleyin)", height=150)
-        
-        # ASIN ve açıklama kaydetmek için buton
-        if st.button("Kaydet", key="add_button", help="Veriyi kaydetmek için tıklayın", use_container_width=True):
-            if description_input:
-                # Veritabanına kaydetme
-                df_existing = load_data()
-                new_data = pd.DataFrame({'ASIN': [asin_input], 'Description': [description_input]})
-                df_combined = pd.concat([df_existing, new_data], ignore_index=True)
-                df_combined.to_csv(DATA_FILE, index=False)
-                
-                st.success(f"✅ '{asin_input}' ASIN başarıyla eklendi!")
-            else:
-                st.warning("Açıklama alanını boş bırakmayın!")
-    elif asin_input:
-        st.error("❌ ASIN 10 karakter olmalıdır. Lütfen geçerli bir ASIN girin.")
-    
-# ---------------------- Raporlar ----------------------
-elif menu_option == "Raporlar":
-    st.header("Eklenmiş ASIN'ler")
-    df_existing = load_data()
-    
-    if len(df_existing) > 0:
-        for index, row in df_existing.iterrows():
-            st.subheader(f"ASIN: {row['ASIN']}")
-            st.write(f"Açıklama: {row['Description']}")
-            st.write("---")
+# Veriyi yükleme fonksiyonu
+@st.cache_data
+def load_data():
+    if os.path.exists(DATA_FILE):
+        return pd.read_csv(DATA_FILE)
     else:
-        st.write("Henüz hiçbir ASIN eklenmedi.")
+        return pd.DataFrame(columns=["ASIN", "Açıklama"])
+
+# ASIN ekleme formu
+st.sidebar.subheader("📅 ASIN Ekle")
+asin = st.sidebar.text_input("ASIN (10 karakter)", max_chars=10)
+aciklama = st.sidebar.text_area("Üürün Açıklaması")
+if st.sidebar.button("Kaydet"):
+    if len(asin) == 10 and aciklama:
+        df = load_data()
+        yeni = pd.DataFrame({"ASIN": [asin], "Açıklama": [aciklama]})
+        df = pd.concat([df, yeni], ignore_index=True)
+        df.to_csv(DATA_FILE, index=False)
+        st.sidebar.success("ASIN eklendi!")
+    else:
+        st.sidebar.error("ASIN 10 karakter olmalı ve açıklama boş bırakılamaz.")
+
+# Seçim menüsü
+secim = st.sidebar.radio("🔍 Görüntüleme Seçimi", ("Raporlar", "Grafikler"))
+
+# Raporlar Tablosu
+if secim == "Raporlar":
+    st.subheader("📊 Eklenmiş ASIN'ler")
+    df = load_data()
+    if not df.empty:
+        AgGrid(df)
+    else:
+        st.info("Henüz ASIN eklenmedi.")
+
+# Plotly ile grafik gösterimi
+elif secim == "Grafikler":
+    st.subheader("🌐 ASIN Dağılım Grafiği")
+    df = load_data()
+    if not df.empty:
+        df['Uzunluk'] = df['Açıklama'].str.len()
+        fig = px.bar(df, x="ASIN", y="Uzunluk", text="Açıklama",
+                     labels={"Uzunluk": "Açıklama Uzunluğu"},
+                     title="ASIN Açıklamalarının Uzunluk Dağılımı")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Görüntülenecek veri yok.")
