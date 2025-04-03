@@ -86,7 +86,7 @@ else:
     selected_dates = df[df['YearMonth'].astype(str) == selected_month]['Date']
     start_date, end_date = selected_dates.min(), selected_dates.max()
 
-filtered_df = df[(df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))]
+filtered_df = df[(df['Date'] >= pd.to_datetime(str(start_date))) & (df['Date'] <= pd.to_datetime(str(end_date)))]
 
 # ---------------------- ASIN & Keyword Seçimi ----------------------
 asins = filtered_df['ASIN'].unique()
