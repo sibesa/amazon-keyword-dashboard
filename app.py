@@ -73,7 +73,7 @@ filter_type = st.sidebar.radio("Zaman Görünümü Seç", ["Günlük", "Haftalı
 if filter_type == "Günlük":
     start_date, end_date = st.sidebar.date_input(
         "Tarih Aralığı", 
-        [min_date.date(), max_date.date()]
+        [min_date, max_date]
     )
 elif filter_type == "Haftalık":
     df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
