@@ -71,10 +71,7 @@ min_date, max_date = df['Date'].min(), df['Date'].max()
 filter_type = st.sidebar.radio("Zaman Görünümü Seç", ["Günlük", "Haftalık", "Aylık"])
 
 if filter_type == "Günlük":
-  start_date, end_date = st.sidebar.date_input(
-    "Tarih Aralığı",
-    [min_date, max_date]
-)
+min_date = df['Date'].dropna().min().date()
 elif filter_type == "Haftalık":
     df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
     selected_week = st.sidebar.selectbox("Hafta Seç (Yıl-Hafta)", sorted(df['YearWeek'].unique()))
