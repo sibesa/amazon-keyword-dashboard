@@ -2,24 +2,44 @@ import streamlit as st
 import pandas as pd
 import os
 
-# Veritabanı dosyası (ASIN'leri ve açıklamaları kaydedeceğiz)
-DATA_FILE = "asin_data.csv"
+# CSS style for custom design
+st.markdown("""
+    <style>
+    /* Sidebar */
+    .css-1d391kg {
+        background-color: #2A3D66;
+        color: white;
+    }
+    .css-ffhzg2 {
+        color: white;
+    }
+    /* Main area */
+    .css-10trblm {
+        background-color: #F5F5F5;
+        padding: 20px;
+    }
+    .stButton button {
+        background-color: #1f77b4;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        padding: 10px 20px;
+    }
+    .stButton button:hover {
+        background-color: #0061C2;
+    }
+    /* Add padding to the content */
+    .css-ffhzg2 {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Veriyi yükle (asın ve açıklamalar)
-@st.cache_data
-def load_data():
-    if os.path.exists(DATA_FILE):
-        df = pd.read_csv(DATA_FILE)
-        return df
-    else:
-        # Veritabanı dosyası yoksa yeni bir dosya oluşturulacak
-        return pd.DataFrame(columns=['ASIN', 'Description'])
-
-# Sayfa başlığı ve ayarları
-st.set_page_config(page_title="Amazon ASIN Yönetimi", layout="wide")
+# Sayfa başlığı
 st.title("🔍 Amazon ASIN Yönetim Paneli")
 
-# ---------------------- Sol Menü ----------------------
+# Sol Menü
 with st.sidebar:
     st.header("Ürün Tanımı")
     menu_option = st.radio("Seçim yapın", ("Ana Sayfa", "ASIN Ekle", "Raporlar"))
@@ -27,6 +47,7 @@ with st.sidebar:
 # ---------------------- ASIN Ekleme Formu ----------------------
 if menu_option == "ASIN Ekle":
     st.header("ASIN Ekleme Formu")
+    st.write("ASIN eklemek için gerekli formu doldurun.")
     
     # ASIN girişi için güzel bir tasarım
     asin_input = st.text_input("ASIN (10 karakterli bir ASIN girin)", value="", max_chars=10)
@@ -53,8 +74,6 @@ if menu_option == "ASIN Ekle":
 # ---------------------- Raporlar ----------------------
 elif menu_option == "Raporlar":
     st.header("Eklenmiş ASIN'ler")
-    
-    # Daha önce eklenmiş ASIN'leri gösterme
     df_existing = load_data()
     
     if len(df_existing) > 0:
@@ -64,7 +83,3 @@ elif menu_option == "Raporlar":
             st.write("---")
     else:
         st.write("Henüz hiçbir ASIN eklenmedi.")
-
-# ---------------------- Ana Sayfa ----------------------
-else:
-    st.write("Ana sayfa içeriği burada yer alacak.")
