@@ -45,39 +45,18 @@ def load_data():
     else:
         return pd.DataFrame(columns=["ASIN", "Açıklama"])
 
-# Sidebar başlık ve menü
+# Sidebar menü
 with st.sidebar:
     st.markdown("<div class='sidebar-title'>SIBESA AMAZON KEYWORD TRACKING</div>", unsafe_allow_html=True)
+    secim_kategori = st.selectbox("📂 Kategori Seçin", ["ASIN Ekle", "ASIN Listesi", "Açıklama Grafiği"])
 
-    tanim_ac = st.expander("Tanımlamalar")
-    asin_ac = st.expander("ASIN'ler")
-    rapor_ac = st.expander("Raporlar")
-
-    with tanim_ac:
-        secim_tanim = st.radio("", ["ASIN Ekle"], key="tanımlar")
-
-    asin_list = load_data()
-    asin_secim = None
-    with asin_ac:
-        if asin_list.empty:
-            st.info("Henüz ASIN eklenmedi.")
-        else:
-            asin_secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="asin_secim")
-
-    with rapor_ac:
-        secim_rapor = st.radio("Rapor Seçimi", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
-        secim_rapor_asin = None
-        if not asin_list.empty:
-            secim_rapor_asin = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="rapor_asin_secim")
-
-# Ana içerik alanı
-if secim_tanim == "ASIN Ekle":
+# Ana içerik
+if secim_kategori == "ASIN Ekle":
     st.subheader("📅 ASIN Ekle")
-    asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10, key="asin_input")
-    aciklama = st.text_area("Üürün Açıklaması", key="aciklama_input")
+    asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10)
+    aciklama = st.text_area("Üürün Açıklaması")
 
-    if st.button("Kaydet", key="kaydet_butonu"):
-        st.write("Butona basıldı")  # Hata ayıklama için
+    if st.button("Kaydet"):
         if len(asin) == 10 and aciklama:
             df = load_data()
             if asin in df["ASIN"].values:
@@ -91,7 +70,7 @@ if secim_tanim == "ASIN Ekle":
         else:
             st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
 
-elif secim_rapor == "ASIN Listesi":
+elif secim_kategori == "ASIN Listesi":
     st.subheader("📊 Eklenmiş ASIN'ler")
     df = load_data()
     if not df.empty:
@@ -99,7 +78,7 @@ elif secim_rapor == "ASIN Listesi":
     else:
         st.info("Henüz ASIN eklenmedi.")
 
-elif secim_rapor == "Açıklama Grafiği":
+elif secim_kategori == "Açıklama Grafiği":
     st.subheader("🌐 Açıklama Uzunluk Grafiği")
     df = load_data()
     if not df.empty:
