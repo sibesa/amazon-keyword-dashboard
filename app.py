@@ -25,6 +25,12 @@ st.markdown("""
     .stTextInput>div>input {
         font-size: 16px;
     }
+    .sidebar-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1f77b4;
+        margin-bottom: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -39,25 +45,43 @@ def load_data():
     else:
         return pd.DataFrame(columns=["ASIN", "Açıklama"])
 
-# ASIN ekleme formu
-st.sidebar.subheader("📅 ASIN Ekle")
-asin = st.sidebar.text_input("ASIN (10 karakter)", max_chars=10)
-aciklama = st.sidebar.text_area("Üürün Açıklaması")
-if st.sidebar.button("Kaydet"):
-    if len(asin) == 10 and aciklama:
-        df = load_data()
-        yeni = pd.DataFrame({"ASIN": [asin], "Açıklama": [aciklama]})
-        df = pd.concat([df, yeni], ignore_index=True)
-        df.to_csv(DATA_FILE, index=False)
-        st.sidebar.success("ASIN eklendi!")
-    else:
-        st.sidebar.error("ASIN 10 karakter olmalı ve açıklama boş bırakılamaz.")
+# Sidebar başlık ve menü
+with st.sidebar:
+    st.markdown("<div class='sidebar-title'>SIBESA AMAZON KEYWORD TRACKING</div>", unsafe_allow_html=True)
 
-# Seçim menüsü
-secim = st.sidebar.radio("🔍 Görüntüleme Seçimi", ("Raporlar", "Grafikler"))
+    tanim_ac = st.expander("Tanımlamalar")
+    asin_ac = st.expander("ASIN'ler")
+    rapor_ac = st.expander("Raporlar")
 
-# Raporlar Tablosu
-if secim == "Raporlar":
+    with tanim_ac:
+        secim = st.radio("", ["Genel Tanımlar"], key="tanımlar")
+
+    with asin_ac:
+        secim = st.radio("", ["ASIN Ekle"], key="asinler")
+
+    with rapor_ac:
+        secim = st.radio("", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+
+# Ana içerik alanı
+if secim == "Genel Tanımlar":
+    st.subheader("Tanımlamalar Paneli")
+    st.write("Buraya tanım işlemleri gelecek...")
+
+elif secim == "ASIN Ekle":
+    st.subheader("📅 ASIN Ekle")
+    asin = st.text_input("ASIN (10 karakter)", max_chars=10)
+    aciklama = st.text_area("Üürün Açıklaması")
+    if st.button("Kaydet"):
+        if len(asin) == 10 and aciklama:
+            df = load_data()
+            yeni = pd.DataFrame({"ASIN": [asin], "Açıklama": [aciklama]})
+            df = pd.concat([df, yeni], ignore_index=True)
+            df.to_csv(DATA_FILE, index=False)
+            st.success("ASIN eklendi!")
+        else:
+            st.error("ASIN 10 karakter olmalı ve açıklama boş bırakılamaz.")
+
+elif secim == "ASIN Listesi":
     st.subheader("📊 Eklenmiş ASIN'ler")
     df = load_data()
     if not df.empty:
@@ -65,9 +89,8 @@ if secim == "Raporlar":
     else:
         st.info("Henüz ASIN eklenmedi.")
 
-# Plotly ile grafik gösterimi
-elif secim == "Grafikler":
-    st.subheader("🌐 ASIN Dağılım Grafiği")
+elif secim == "Açıklama Grafiği":
+    st.subheader("🌐 Açıklama Uzunluk Grafiği")
     df = load_data()
     if not df.empty:
         df['Uzunluk'] = df['Açıklama'].str.len()
