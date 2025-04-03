@@ -35,7 +35,7 @@ if uploaded_file:
         }, inplace=True)
 
         df_cleaned['Type'] = df_cleaned['Badge'].apply(lambda x: 'Reklamlı' if x == 'SP' else 'Organik')
-        df_cleaned['Date'] = input_date
+        df_cleaned['Date'] = pd.to_datetime(input_date)
         df_cleaned = df_cleaned[['Date', 'ASIN', 'Keyword', 'Type', 'Position', 'SearchVolume']]
 
         if os.path.exists(DATA_FILE):
@@ -83,7 +83,8 @@ if filter_type == "Günlük":
         start_date = min_date
         end_date = max_date
 elif filter_type == "Haftalık":
-    df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    df['YearWeek'] = df['Date'].apply(lambda x: x.strftime('%Y-%U') if pd.notnull(x) else '')
     selected_week = st.sidebar.selectbox("Hafta Seç (Yıl-Hafta)", sorted(df['YearWeek'].unique()))
     selected_dates = df[df['YearWeek'] == selected_week]['Date']
     start_date, end_date = selected_dates.min().date(), selected_dates.max().date()
@@ -149,7 +150,8 @@ else:
 
 # ---------------------- Haftalık Trend ----------------------
 st.subheader("📆 Haftalık Ortalama Pozisyon")
-df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+df['YearWeek'] = df['Date'].apply(lambda x: x.strftime('%Y-%U') if pd.notnull(x) else '')
 trend_df = df[(df['ASIN'] == selected_asin) & (df['Keyword'] == selected_keyword)]
 trend = trend_df.groupby(['YearWeek', 'Type'])['Position'].mean().reset_index()
 fig2 = px.line(trend, x='YearWeek', y='Position', color='Type', markers=True)
