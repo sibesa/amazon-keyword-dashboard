@@ -12,6 +12,7 @@ def load_data():
         df = pd.read_csv(DATA_FILE)
         return df
     else:
+        # Veritabanı dosyası yoksa yeni bir dosya oluşturulacak
         return pd.DataFrame(columns=['ASIN', 'Description'])
 
 # Sayfa başlığı ve ayarları
