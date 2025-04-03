@@ -18,8 +18,11 @@ st.title("🔍 Amazon Anahtar Kelime Sıralama Dashboard")
 # ---------------------- ASIN Tanımlama ----------------------
 asin_input = st.sidebar.text_input("Yeni ASIN Tanımla (10 karakterli bir ASIN girin)", value="")
 
-# ASIN'in 10 karakterli olup olmadığını kontrol et
+# ASIN'in 10 karakterli olup olmadığını kontrol et ve fazla karakteri engelle
 if asin_input:
+    if len(asin_input) > 10:
+        asin_input = asin_input[:10]  # ASIN 10 karakterden fazla ise sadece ilk 10 karakteri al
+        st.sidebar.warning("❌ ASIN 10 karakterden fazla, ilk 10 karakteri alındı!")
     if len(asin_input) == 10:
         asin_list = [asin_input]  # Tek bir ASIN listesi
         st.sidebar.write("ASIN Listesi:", asin_list)
