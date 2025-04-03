@@ -60,7 +60,7 @@ if not os.path.exists(DATA_FILE):
     st.warning("📄 Henüz veri yüklenmedi. Lütfen sol panelden bir Excel yükleyin.")
     st.stop()
 
-df = load_data()
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
 # Favori dosyası kontrol
 if os.path.exists(FAV_FILE):
