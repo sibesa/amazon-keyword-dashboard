@@ -34,4 +34,5 @@ if uploaded_file:
         'Position': 'Position',
         'Searches/M': 'SearchVolume'
     }, inplace=True)
-    df_cleaned['Type'] = df_cleaned['Badge'].apply(lambda x:
+  df_cleaned['Type'] = df_cleaned['Badge'].apply(lambda x: 'Reklamlı' if x == 'SP' else 'Organik')
+
