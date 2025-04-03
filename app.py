@@ -75,9 +75,6 @@ if filter_type == "Günlük":
     "Tarih Aralığı",
     [min_date.to_pydatetime().date(), max_date.to_pydatetime().date()]
 )
-
-)
-
     )
 elif filter_type == "Haftalık":
     df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
