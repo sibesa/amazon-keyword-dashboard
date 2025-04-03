@@ -87,8 +87,6 @@ if secim_tanim == "ASIN Ekle":
                 df = pd.concat([df, yeni], ignore_index=True)
                 df.to_csv(DATA_FILE, index=False)
                 st.success("ASIN başarıyla kaydedildi!")
-                st.session_state.asin_input = ""
-                st.session_state.aciklama_input = ""
                 st.rerun()
         else:
             st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
