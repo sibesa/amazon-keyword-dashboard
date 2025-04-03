@@ -73,9 +73,11 @@ with st.sidebar:
 # Ana içerik alanı
 if secim_tanim == "ASIN Ekle":
     st.subheader("📅 ASIN Ekle")
-    asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10)
-    aciklama = st.text_area("Üürün Açıklaması")
-    if st.button("Kaydet"):
+    asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10, key="asin_input")
+    aciklama = st.text_area("Üürün Açıklaması", key="aciklama_input")
+
+    if st.button("Kaydet", key="kaydet_butonu"):
+        st.write("Butona basıldı")  # Hata ayıklama için
         if len(asin) == 10 and aciklama:
             df = load_data()
             if asin in df["ASIN"].values:
@@ -85,6 +87,8 @@ if secim_tanim == "ASIN Ekle":
                 df = pd.concat([df, yeni], ignore_index=True)
                 df.to_csv(DATA_FILE, index=False)
                 st.success("ASIN başarıyla kaydedildi!")
+                st.session_state.asin_input = ""
+                st.session_state.aciklama_input = ""
                 st.rerun()
         else:
             st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
