@@ -54,7 +54,7 @@ with st.sidebar:
     rapor_ac = st.expander("Raporlar")
 
     with tanim_ac:
-        secim = st.radio("", ["ASIN Ekle"], key="tanımlar")
+        secim_tanim = st.radio("", ["ASIN Ekle"], key="tanımlar")
 
     asin_list = load_data()
     asin_secim = None
@@ -65,12 +65,13 @@ with st.sidebar:
             asin_secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="asin_secim")
 
     with rapor_ac:
-        rapor_secim = st.radio("Rapor Seçimi", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+        secim_rapor = st.radio("Rapor Seçimi", ["ASIN Listesi", "Açıklama Grafiği"], key="raporlar")
+        secim_rapor_asin = None
         if not asin_list.empty:
-            secim = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="rapor_asin_secim")
+            secim_rapor_asin = st.radio("Ekli ASIN'ler", asin_list["ASIN"].tolist(), key="rapor_asin_secim")
 
 # Ana içerik alanı
-if secim == "ASIN Ekle":
+if secim_tanim == "ASIN Ekle":
     st.subheader("📅 ASIN Ekle")
     asin = st.text_input("ASIN (Tam olarak 10 karakter girin)", max_chars=10)
     aciklama = st.text_area("Üürün Açıklaması")
@@ -88,7 +89,7 @@ if secim == "ASIN Ekle":
         else:
             st.error("ASIN tam olarak 10 karakter olmali ve açıklama girilmelidir.")
 
-elif rapor_secim == "ASIN Listesi":
+elif secim_rapor == "ASIN Listesi":
     st.subheader("📊 Eklenmiş ASIN'ler")
     df = load_data()
     if not df.empty:
@@ -96,7 +97,7 @@ elif rapor_secim == "ASIN Listesi":
     else:
         st.info("Henüz ASIN eklenmedi.")
 
-elif rapor_secim == "Açıklama Grafiği":
+elif secim_rapor == "Açıklama Grafiği":
     st.subheader("🌐 Açıklama Uzunluk Grafiği")
     df = load_data()
     if not df.empty:
