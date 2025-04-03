@@ -4,11 +4,25 @@ import plotly.express as px
 from st_aggrid import AgGrid
 import os
 
-# Sayfa ayarları
+# Veri dosyası yolu
+DATA_FILE = "asin_data.csv"
+
+# Dosya yoksa oluştur ve yazma izni kontrol et
+if not os.path.exists(DATA_FILE):
+    df_init = pd.DataFrame(columns=["ASIN", "Açıklama"])
+    df_init.to_csv(DATA_FILE, index=False)
+
+try:
+    with open(DATA_FILE, "a") as f:
+        pass
+except PermissionError:
+    st.error("❌ 'asin_data.csv' dosyası yazılamıyor. Lütfen yazma izni verin.")
+
+# Sayfa ayarı
 st.set_page_config(page_title="Amazon ASIN Dashboard", layout="wide")
 st.title("🔍 Amazon ASIN Dashboard")
 
-# CSS ile stil güzelleştirme
+# CSS stil
 st.markdown("""
     <style>
     .stButton>button {
@@ -34,10 +48,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Veri dosyası
-DATA_FILE = "asin_data.csv"
-
-# Veriyi yükleme fonksiyonu
+# Veri yükleme fonksiyonu
 @st.cache_data
 def load_data():
     if os.path.exists(DATA_FILE):
