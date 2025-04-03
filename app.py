@@ -8,23 +8,23 @@ import os
 FAV_FILE = "favorites.csv"
 DATA_FILE = "keyword_tracking.csv"
 
+# 📥 Veri yükleme
 @st.cache_data
 def load_data():
-    df = pd.read_csv(DATA_FILE, parse_dates=['Date'])
+    df = pd.read_csv(DATA_FILE, parse_dates=['Date'])  # Tarih kolonunu otomatik tanır
     return df
 
+# Sayfa yapılandırması
 st.set_page_config(page_title="Amazon Keyword Dashboard", layout="wide")
 st.title("🔍 Amazon Anahtar Kelime Sıralama Dashboard")
 
 # ---------------------- Excel Yükleme ----------------------
-
 st.sidebar.header("📥 Excel Dosyası Yükle")
 uploaded_file = st.sidebar.file_uploader("Excel dosyasını seçin", type=["xlsx"])
 if uploaded_file:
     try:
         excel_data = pd.ExcelFile(uploaded_file)
         df_new = excel_data.parse('B0CHJF8YM6')
-
         input_date = st.sidebar.date_input("Veri Tarihi", datetime.today().date())
 
         df_cleaned = df_new[['Keywords', 'Child ASIN', 'Badge', 'Position', 'Searches/M']].copy()
@@ -51,24 +51,23 @@ if uploaded_file:
         st.rerun()
 
     except Exception as e:
-        st.sidebar.error(f"❌ Hata oluştu: {e}")
+        st.sidebar.error(f"Hata oluştu: {e}")
         st.stop()
 
-# ---------------------- Veri Kontrol ----------------------
-
+# ---------------------- Veri Yükle ----------------------
 if not os.path.exists(DATA_FILE):
     st.warning("📄 Henüz veri yüklenmedi. Lütfen sol panelden bir Excel yükleyin.")
     st.stop()
 
 df = load_data()
 
-# Favori dosyası kontrol
+# Favori dosyası
 if os.path.exists(FAV_FILE):
     fav_df = pd.read_csv(FAV_FILE)
 else:
     fav_df = pd.DataFrame(columns=["ASIN", "Keyword"])
 
-# ---------------------- Zaman Filtresi ----------------------
+# ---------------------- Tarih Filtresi ----------------------
 st.sidebar.header("🗓️ Tarih Filtresi")
 min_date, max_date = df['Date'].min(), df['Date'].max()
 filter_type = st.sidebar.radio("Zaman Görünümü Seç", ["Günlük", "Haftalık", "Aylık"])
@@ -86,9 +85,12 @@ else:
     selected_dates = df[df['YearMonth'].astype(str) == selected_month]['Date']
     start_date, end_date = selected_dates.min(), selected_dates.max()
 
-filtered_df = df[(df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))]
+# Güvenli filtreleme
+start = pd.to_datetime(start_date)
+end = pd.to_datetime(end_date)
+filtered_df = df[(df['Date'] >= start) & (df['Date'] <= end)]
 
-# ---------------------- ASIN & Keyword Seçimi ----------------------
+# ---------------------- ASIN ve Keyword Seçimi ----------------------
 asins = filtered_df['ASIN'].unique()
 selected_asin = st.selectbox("ASIN Seçin", sorted(asins))
 asin_df = filtered_df[filtered_df['ASIN'] == selected_asin]
@@ -106,7 +108,7 @@ if st.button("⭐ Favorilere Ekle" if not is_fav else "❌ Favoriden Kaldır"):
     fav_df.to_csv(FAV_FILE, index=False)
     st.rerun()
 
-# ---------------------- Grafik: Günlük Pozisyon ----------------------
+# ---------------------- Günlük Pozisyon Grafiği ----------------------
 st.subheader(f"📈 '{selected_keyword}' için Sıralama Değişimi ({selected_asin})")
 fig = px.line(keyword_df, x='Date', y='Position', color='Type', markers=True)
 fig.update_yaxes(autorange="reversed")
@@ -132,7 +134,6 @@ if len(latest_dates) == 2:
             return "Düşmüş"
         else:
             return "Aynı"
-
     df_c['Durum'] = df_c.apply(durum, axis=1)
     st.dataframe(df_c[['Keyword', 'Type', 'Position_yesterday', 'Position_today', 'Durum']])
 else:
@@ -142,8 +143,8 @@ else:
 st.subheader("📆 Haftalık Ortalama Pozisyon")
 df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
 trend_df = df[(df['ASIN'] == selected_asin) & (df['Keyword'] == selected_keyword)]
-trend = trend_df.groupby(['YearWeek', 'Type'])['Position'].mean().reset_index()
-fig2 = px.line(trend, x='YearWeek', y='Position', color='Type', markers=True)
+weekly_avg = trend_df.groupby(['YearWeek', 'Type'])['Position'].mean().reset_index()
+fig2 = px.line(weekly_avg, x='YearWeek', y='Position', color='Type', markers=True)
 fig2.update_yaxes(autorange="reversed")
 st.plotly_chart(fig2, use_container_width=True)
 
@@ -162,7 +163,7 @@ if 'df_c' in locals():
     yükselen = df_c[df_c['Durum'] == 'Yükselmiş'].sort_values(by='Position_yesterday').head(10)
     st.dataframe(yükselen[['Keyword', 'Position_yesterday', 'Position_today']])
 
-# ---------------------- Favori Paneli ----------------------
+# ---------------------- Favoriler Paneli ----------------------
 st.sidebar.markdown("---")
 st.sidebar.markdown("### ⭐ Favori Anahtar Kelimeler")
 if not fav_df.empty:
