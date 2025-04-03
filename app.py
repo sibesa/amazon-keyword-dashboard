@@ -75,7 +75,6 @@ if filter_type == "Günlük":
     "Tarih Aralığı",
     [min_date.to_pydatetime().date(), max_date.to_pydatetime().date()]
 )
-    )
 elif filter_type == "Haftalık":
     df['YearWeek'] = df['Date'].dt.strftime('%Y-%U')
     selected_week = st.sidebar.selectbox("Hafta Seç (Yıl-Hafta)", sorted(df['YearWeek'].unique()))
