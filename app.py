@@ -48,7 +48,7 @@ if uploaded_file:
 
         df_combined.to_csv(DATA_FILE, index=False)
         st.sidebar.success("✅ Veri başarıyla yüklendi!")
-        st.experimental_rerun()
+        st.rerun()
 
     except Exception as e:
         st.sidebar.error(f"❌ Hata oluştu: {e}")
